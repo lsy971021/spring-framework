@@ -56,7 +56,6 @@ public class Test {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("test.xml");
         Student bean = context.getBean(Student.class);
         context.close();
-
         //想通过student获取其他bean对象怎么办？
 
 
