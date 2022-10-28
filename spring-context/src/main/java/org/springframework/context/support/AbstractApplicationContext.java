@@ -313,7 +313,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public ConfigurableEnvironment getEnvironment() {
 		if (this.environment == null) {
-			this.environment = createEnvironment();
+			this.environment = createEnvironment(); //createEnvironment() ： 会继承父类，执行父类的构造方法
 		}
 		return this.environment;
 	}
@@ -324,7 +324,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * a custom {@link ConfigurableEnvironment} implementation.
 	 */
 	protected ConfigurableEnvironment createEnvironment() {
-		return new StandardEnvironment();
+		return new StandardEnvironment();	//没有构造方法，会继承父类的构造方法
 	}
 
 	/**
@@ -517,10 +517,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
 			// Prepare this context for refreshing.
-			prepareRefresh();
+			prepareRefresh();	//准备工作
 
 			// Tell the subclass to refresh the internal bean factory.
-			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory(); //获得刷新的bean工厂
 
 			// Prepare the bean factory for use in this context.
 			prepareBeanFactory(beanFactory);
@@ -584,6 +584,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void prepareRefresh() {
 		// Switch to active.
+		//设置启动时间
 		this.startupDate = System.currentTimeMillis();
 		this.closed.set(false);
 		this.active.set(true);
@@ -593,13 +594,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment.
+		//初始化属性资源，可自定义扩展
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
+		// getEnvironment()： 里面包含当前系统的某些属性值或变量，方便后续的获取工作
+		//validateRequiredProperties() ：  验证属性资源
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
+		//创建监听器集合
 		if (this.earlyApplicationListeners == null) {
 			this.earlyApplicationListeners = new LinkedHashSet<>(this.applicationListeners);
 		}
@@ -611,6 +616,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Allow for the collection of early ApplicationEvents,
 		// to be published once the multicaster is available...
+		//创建事件集合对象
 		this.earlyApplicationEvents = new LinkedHashSet<>();
 	}
 
