@@ -119,6 +119,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws BeansException {
+		//如果存在beanFactory，则销毁
 		if (hasBeanFactory()) {
 			destroyBeans();
 			closeBeanFactory();
@@ -126,8 +127,11 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		try {
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			beanFactory.setSerializationId(getId());
+			//定制beanFactory，设置相关属性，包括是否允许覆盖相同名称的不同定义的对象已及循环依赖问题
 			customizeBeanFactory(beanFactory);
-			loadBeanDefinitions(beanFactory);	//加载bean的定义信息
+			//加载bean的定义信息
+			//读取xml中的bean ！！
+			loadBeanDefinitions(beanFactory);
 			this.beanFactory = beanFactory;
 		}
 		catch (IOException ex) {
@@ -212,10 +216,11 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @see DefaultListableBeanFactory#setAllowEagerClassLoading
 	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
-		if (this.allowBeanDefinitionOverriding != null) {  //是否允许被覆盖（定义bean信息时 一些属性）
+		//默认父类都有实现，都为true，可重写此方法，进行设置为false
+		if (this.allowBeanDefinitionOverriding != null) {  //是否允许被覆盖相同名称的不同定义的对象（定义bean信息时 一些属性）
 			beanFactory.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
 		}
-		if (this.allowCircularReferences != null) {	//是否允许循环依赖
+		if (this.allowCircularReferences != null) {	//是否允许解决循环依赖问题（是否允许bean之间存在循环依赖）
 			beanFactory.setAllowCircularReferences(this.allowCircularReferences);
 		}
 	}

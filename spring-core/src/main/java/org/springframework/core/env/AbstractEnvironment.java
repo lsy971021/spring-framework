@@ -64,6 +64,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * with strict SecurityManager settings and AccessControlExceptions warnings.
 	 * @see #suppressGetenvAccess()
 	 */
+	//设置一些忽略的环境值
 	public static final String IGNORE_GETENV_PROPERTY_NAME = "spring.getenv.ignore";
 
 	/**
@@ -75,6 +76,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * {@code SPRING_PROFILES_ACTIVE}.
 	 * @see ConfigurableEnvironment#setActiveProfiles
 	 */
+	// 哪个文件是激活的
 	public static final String ACTIVE_PROFILES_PROPERTY_NAME = "spring.profiles.active";
 
 	/**
@@ -86,6 +88,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * {@code SPRING_PROFILES_DEFAULT}.
 	 * @see ConfigurableEnvironment#setDefaultProfiles
 	 */
+	//默认用的是哪个属性文件
 	public static final String DEFAULT_PROFILES_PROPERTY_NAME = "spring.profiles.default";
 
 	/**

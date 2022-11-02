@@ -54,8 +54,11 @@ public class Test {
 //        B b = new B();
 
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("test.xml");
-        Student bean = context.getBean(Student.class);
-        context.close();
+//		MyClassPathXmlApplicationContext context = new MyClassPathXmlApplicationContext();
+		context.getBeanFactory().addPropertyEditorRegistrar(new DateEditorRegistrar());
+		Person bean = context.getBean(Person.class);
+		System.out.println(bean.toString());
+		context.close();
         //想通过student获取其他bean对象怎么办？
 
 

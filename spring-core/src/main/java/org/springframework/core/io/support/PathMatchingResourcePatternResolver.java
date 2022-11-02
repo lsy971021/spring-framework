@@ -202,6 +202,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private final ResourceLoader resourceLoader;
 
+	/**
+	 * 创建ant方式的路径匹配器（ant风格是一种路径匹配方式， 示例：/img/*.jpg）
+	 * 1、Spring中的配置加载：classpath:spring*.xml
+	 * 2、Spring中的组件扫描：base-package="cn.fddlc.**"
+	 */
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
 

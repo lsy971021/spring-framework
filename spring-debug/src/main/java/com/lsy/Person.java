@@ -5,12 +5,24 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import java.util.Date;
+
 public class Person implements BeanFactoryAware, ApplicationContextAware {
 
     private int id;
     private String name;
 
-    private ApplicationContext applicationContext;
+	private Date birthday;
+
+	public Date getBirthday() {
+		return birthday;
+	}
+
+	public void setBirthday(Date birthday) {
+		this.birthday = birthday;
+	}
+
+	private ApplicationContext applicationContext;
     private BeanFactory beanFactory;
 
     public int getId() {
@@ -46,4 +58,15 @@ public class Person implements BeanFactoryAware, ApplicationContextAware {
     public void setBeanFactory(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
     }
+
+	@Override
+	public String toString() {
+		return "Person{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", birthday=" + birthday +
+				", applicationContext=" + applicationContext +
+				", beanFactory=" + beanFactory +
+				'}';
+	}
 }

@@ -77,7 +77,9 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 		if (locations != null) {
 			Assert.noNullElements(locations, "Config locations must not be null");
 			this.configLocations = new String[locations.length];
+			// 对路径进行遍历  如： spring-${username}.xml , 对 ${username} 进行替换
 			for (int i = 0; i < locations.length; i++) {
+				//解析给定路径
 				this.configLocations[i] = resolvePath(locations[i]).trim();
 			}
 		}

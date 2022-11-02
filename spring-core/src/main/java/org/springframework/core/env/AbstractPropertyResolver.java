@@ -60,6 +60,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	@Nullable
 	private String valueSeparator = SystemPropertyUtils.VALUE_SEPARATOR;
 
+	//必须要的属性值，如果没有就报错
 	private final Set<String> requiredProperties = new LinkedHashSet<>();
 
 
@@ -141,10 +142,12 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		}
 	}
 
+	//用来验证是否有必须要的属性值 ，可通过 -D xx=x 来设置属性值
 	@Override
 	public void validateRequiredProperties() {
 		MissingRequiredPropertiesException ex = new MissingRequiredPropertiesException();
 		for (String key : this.requiredProperties) {
+			//getProperty()系统属性值 ， System.getProperties()来获取
 			if (this.getProperty(key) == null) {
 				ex.addMissingRequiredProperty(key);
 			}
