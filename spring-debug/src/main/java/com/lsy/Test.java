@@ -54,6 +54,7 @@ public class Test {
 //        B b = new B();
 
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("test.xml");
+
 //		MyClassPathXmlApplicationContext context = new MyClassPathXmlApplicationContext();
 		context.getBeanFactory().addPropertyEditorRegistrar(new DateEditorRegistrar());
 		Person bean = context.getBean(Person.class);
@@ -69,4 +70,5 @@ public class Test {
 //        System.out.println(bean.getBeanFactory());
 
     }
+
 }
