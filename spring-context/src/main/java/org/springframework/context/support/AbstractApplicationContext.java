@@ -539,7 +539,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
-			//beanFactory的准备工作，对各种属性进行填充
+			//beanFactory的准备工作，对各种属性进行填充的一个规则及一些属性设置
 			prepareBeanFactory(beanFactory);
 
 			try {
@@ -713,6 +713,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// 运行期织入则是采用cglib和jdk进行切面织入
 
 		//aspectJ提供了两种织入方式，第一种是通过特殊编译器，在编译期，将aspectj语言编写的切面类织入到java类中，第二种是类加载期织入，就是下面的 LOAD_TIME_WEAVER_BEAN_NAME 织入
+		//提供一个AOP的处理方式
 		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
 			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
 			// Set a temporary ClassLoader for type matching.
@@ -720,13 +721,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Register default environment beans.
+		// 向容器中注册三个属性值 加载环境的属性值 在前期的已经创建了
+		// 注册默认的系统环境bean到一级缓存
 		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
+			// 包含下面的两个
 			beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
 		}
 		if (!beanFactory.containsLocalBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
+			//System.getenv()
 			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, getEnvironment().getSystemProperties());
 		}
 		if (!beanFactory.containsLocalBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
+			//System.getProperties()
 			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, getEnvironment().getSystemEnvironment());
 		}
 	}
@@ -742,6 +748,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 实例化并且调用所有已经注册了的beanFactoryPostProcessor
+	 *
 	 * Instantiate and invoke all registered BeanFactoryPostProcessor beans,
 	 * respecting explicit order if given.
 	 * <p>Must be called before singleton instantiation.
@@ -749,6 +757,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		//获取到当前应用程序上下文的beanFactoryPostProcessors变量的值，并且实例化调用执行所有已经注册的beanFactoryPostProcessor
 		//默认情况下，通过getBeanFactoryPostProcessors()来获取已经注册的BFPP，但是默认是空的
+		//add方法：
+		//	可以把一个BeanFactoryPostProcessor的实现类注入到容器
+		//	可以在重写的 customizeBeanFactory中调用super.addBeanFactoryPostProcessor()方法
+		//BFPP(BeanFactoryPostProcessor)处理顺序： (整个spring运行期间可以有多个BFPP)
+		//	外部的集合（自定义添加的） -> 子集 -> 父级
+		//  如果一个类实现了BeanDefinitionRegistryPostProcessor,那么他的postProcessBeanFactory()方法可以跟其他的BFPP一起执行
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime
