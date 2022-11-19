@@ -70,7 +70,7 @@ final class PostProcessorRegistrationDelegate {
 
 			// 唯一方法：postProcessBeanFactory ，在Bean实例化之前执行，所有的beanDefinition全部加载完毕，然后可以对这些bd做一些属性的修改或者添加工作
 			//存放BeanFactoryPostProcessor（用来修改BFPP中的所有对象）的集合
-			//spring中有内置的一些BeanFactoryPostProcessor实现类，常用的由PropertyPlaceHolderConfigurer、CustomEditorConfigurer（用来注册自定义的属性编辑器）等
+			//spring中有内置的一些BeanFactoryPostProcessor实现类，常用的有PropertyPlaceHolderConfigurer、CustomEditorConfigurer（用来注册自定义的属性编辑器）等
 			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
 
 			//继承于BFPP，新增了postProcessBeanDefinitionRegistry方法，方法参数是BeanDefinitionRegistry（BeanDefinition的保存中心）,这个方法主要是在应用程序上下文中添加BeanDefinition
