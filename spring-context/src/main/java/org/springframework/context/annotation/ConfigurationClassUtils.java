@@ -47,8 +47,14 @@ import org.springframework.stereotype.Component;
  */
 abstract class ConfigurationClassUtils {
 
+	/**
+	 * class 如果是 @Configuration 注解标注的类，那么将属性标注为full
+	 */
 	private static final String CONFIGURATION_CLASS_FULL = "full";
 
+	/**
+	 * 非 @Configuration 注解标注的类，那么将属性标注为lite
+	 */
 	private static final String CONFIGURATION_CLASS_LITE = "lite";
 
 	private static final String CONFIGURATION_CLASS_ATTRIBUTE =
@@ -85,14 +91,25 @@ abstract class ConfigurationClassUtils {
 		}
 
 		AnnotationMetadata metadata;
+		/**
+		 * 主要是对beanDef进行分类  获取原数据信息
+		 */
+
+
+		// 通过注解注入的 bd 都是 AnnotatedGenericBeanDefinition 实现了AnnotateBeanDefinition
+		// spring 内部的 bd 都是 rootBeanDefinition. 实现了 AbstractBeanDefinition
+		// 此处主要用于判断是否归属于 AnnotatedBeanDefinition
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
 			// Can reuse the pre-parsed metadata from the given BeanDefinition...
+			// 从当前bean的定义信息中获取原数据信息
 			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
 		}
+		// 判断是否是spring中默认的BeanDefinition
 		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
 			// Check already loaded Class if present...
 			// since we possibly can't even load the class file for this Class.
+			// 获取当前bean的class对象
 			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
 			metadata = new StandardAnnotationMetadata(beanClass, true);
 		}
@@ -109,9 +126,17 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
+
+		/**
+		 * 对原数据信息进行判断，并往beanDefinition中设置属性值
+		 */
+
+
+		// 判断当前 BeanDefinition 是否存在 @Configuration 注解，那么设置 configurationClass 属性为 full
 		if (isFullConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
+		// 如果包含 @Bean，@Component，@ComponentScan，@Import，@ImportSource注解，则设置为lite
 		else if (isLiteConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
@@ -164,6 +189,7 @@ abstract class ConfigurationClassUtils {
 			return false;
 		}
 
+		// 判断是否被注解 @Component、@ComponentScan、@Import 、@ImportResource 标注
 		// Any of the typical annotations found?
 		for (String indicator : candidateIndicators) {
 			if (metadata.isAnnotated(indicator)) {
@@ -172,6 +198,7 @@ abstract class ConfigurationClassUtils {
 		}
 
 		// Finally, let's look for @Bean methods...
+		// 判断是否是 @Bean 标注的方法
 		try {
 			return metadata.hasAnnotatedMethods(Bean.class.getName());
 		}
