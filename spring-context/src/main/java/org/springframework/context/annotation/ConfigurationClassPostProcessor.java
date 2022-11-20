@@ -342,6 +342,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
 			// 解析带有 @Controller，@Import，@ImportSource，@ComponentScan，@ComponentScans，@Bean 的 BeanDefinition
+			// 其中 springboot中启动类注解 @SpringBootApplication 中的 @EnableAutoConfiguration 中的
+			// 		@AutoConfigurationPackage、@Import({AutoConfigurationImportSelector.class}) 是完成springboot自动装配的核心注解
 			parser.parse(candidates);
 			// 将解析完的 Configuration配置类进行校验，1、配置累不能是final 2、@Bean修饰的方法必须可以重写以支持CGLIB
 			parser.validate();

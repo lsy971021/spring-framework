@@ -249,29 +249,40 @@ final class PostProcessorRegistrationDelegate {
 
 	public static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
-
+		// 找到所有实现了 BeanPostProcessor 接口的类
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		// Register BeanPostProcessorChecker that logs an info message when
 		// a bean is created during BeanPostProcessor instantiation, i.e. when
 		// a bean is not eligible for getting processed by all BeanPostProcessors.
+		// 记录下BeanPostProcessor的目标计数
+		// 此处为什么要 +1 ： 在此方法的最后会添加一个ApplicationListenerDetector的类
 		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + postProcessorNames.length;
+		// 添加 BeanPostProcessorChecker（主要用于记录信息）到beanFactory中
 		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
 
 		// Separate between BeanPostProcessors that implement PriorityOrdered,
 		// Ordered, and the rest.
+		// 定义存放实现了 priorityOrdered 接口的 BeanPostProcessor 集合
 		List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
+		// 定义存放spring内部的 BeanPostProcessor
 		List<BeanPostProcessor> internalPostProcessors = new ArrayList<>();
+		// 定义存放实现了 ordered 接口的 BeanPostProcessor 的name集合
 		List<String> orderedPostProcessorNames = new ArrayList<>();
+		// 定义存放普通的 BeanPostProcessor 的name集合
 		List<String> nonOrderedPostProcessorNames = new ArrayList<>();
+		// 遍历 beanFactory中存在的 BeanPostProcessor 的集合 postProcessorNames
 		for (String ppName : postProcessorNames) {
+			// 如果 ppName 对应的 BeanPostProcessor实例实现了 PriorityOrdered 接口，则获取到ppName对应的BeanPostProcessor的实例添加到priorityOrderedPostProcessors
 			if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
 				BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
 				priorityOrderedPostProcessors.add(pp);
+				// 如果ppName对应的BeanPostProcessor实例也实现了MergedBeanDefinitionPostProcessor接口，那么则将ppName对应的bean实例添加到internalPostProcessors
 				if (pp instanceof MergedBeanDefinitionPostProcessor) {
 					internalPostProcessors.add(pp);
 				}
 			}
+			// 如果ppName对应的BeanPostProcessor实例实现了Ordered接口，那么将ppName对应的bean实例添加到orderedPostProcessorNames
 			else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
 				orderedPostProcessorNames.add(ppName);
 			}
@@ -309,10 +320,12 @@ final class PostProcessorRegistrationDelegate {
 
 		// Finally, re-register all internal BeanPostProcessors.
 		sortPostProcessors(internalPostProcessors, beanFactory);
+		// 注册所有实现了 MergedBeanDefinitionPostProcessor类型的BeanPostProcessor到beanFactory中
 		registerBeanPostProcessors(beanFactory, internalPostProcessors);
 
 		// Re-register post-processor for detecting inner beans as ApplicationListeners,
 		// moving it to the end of the processor chain (for picking up proxies etc).
+		// 注册 ApplicationListenerDetector 到 beanFactory 中
 		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(applicationContext));
 	}
 
@@ -387,6 +400,8 @@ final class PostProcessorRegistrationDelegate {
 
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) {
+			// 1、BeanPostProcessor类型不检测
+			// 2、ROLE_INFRASTRUCTURE这种类型的bean不检测 （spring自己的bean）
 			if (!(bean instanceof BeanPostProcessor) && !isInfrastructureBean(beanName) &&
 					this.beanFactory.getBeanPostProcessorCount() < this.beanPostProcessorTargetCount) {
 				if (logger.isInfoEnabled()) {
