@@ -556,7 +556,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
-				// 为上下文初始化message源，即不同语言的消息体，国际化处理
+				// 为上下文初始化message源，即不同语言的消息体，国际化处理，在springmvc的时候通过国际化的代码有用
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
@@ -791,12 +791,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Use parent's if none defined in this context.
 	 */
 	protected void initMessageSource() {
+		// 获取bean工厂，一般是DefaultListableBeanFactory
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		// 首先判断是否已有xml文件定义了id为messageSource的bean对象
 		if (beanFactory.containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
+			// 如果有，则从beanFactory中获取这个对象
 			this.messageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
+
 			// Make MessageSource aware of parent MessageSource.
+			// 当父类bean工厂不为空，并且这个bean对象是HierarchicalMessageSource类型
 			if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource) {
+				// 类型强制转换，转换为HierarchicalMessageSource的类型
 				HierarchicalMessageSource hms = (HierarchicalMessageSource) this.messageSource;
+				// 判断父类的messageSource是否为空，如果等于空，则设置父类的messageSource
 				if (hms.getParentMessageSource() == null) {
 					// Only set parent context as parent MessageSource if no parent MessageSource
 					// registered already.
@@ -809,9 +816,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 		else {
 			// Use empty MessageSource to be able to accept getMessage calls.
+			// 如果没有xml文件定义信息源对象，新建DelegatingMessageSource类作为messageSource的bean
 			DelegatingMessageSource dms = new DelegatingMessageSource();
+			// 给这个DelegatingMessageSource添加父类消息源
 			dms.setParentMessageSource(getInternalParentMessageSource());
 			this.messageSource = dms;
+			// 将这个messageSource实例注册到bean工厂中
 			beanFactory.registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
