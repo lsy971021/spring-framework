@@ -1000,15 +1000,27 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
+	 *
+	 * 在spring内部实际上使用的BeanDefinition(接口)其实都是合并后的RootBeanDefinition对象，通过它进行对象的实例化，注入等
+	 *
+	 * spring有哪些BeanDefinition：
+	 * 		ConfigurationClassBeanDefinition (@Bean标注的)
+	 * 		AnnotatedGenericBeanDefinition (@Configuration标注的)
+	 * 		ScannedGenericBeanDefinition (通过@ComponentScan扫描或扫描行为产生的)
+	 * 		RootBeanDefinition (Spring最终使用的BeanDefinition，其他BeanDefinition都会转换为它)
 	 */
 	@Override
 	public BeanDefinition getMergedBeanDefinition(String name) throws BeansException {
+		// 获取真正的beanName
 		String beanName = transformedBeanName(name);
 		// Efficiently check whether bean definition exists in this factory.
 		if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof ConfigurableBeanFactory) {
+			// 如果当前BeanFactory中不存在beanName的Bean定义 && 父BeanFactory是ConfigurableBeanFactory
+			// 则调用父BeanFactory去获取beanName的MergedBeanDefinition
 			return ((ConfigurableBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName);
 		}
 		// Resolve merged bean definition locally.
+		// 在当前BeanFactory中解析beanName的MergedBeanDefinition
 		return getMergedLocalBeanDefinition(beanName);
 	}
 
@@ -1260,7 +1272,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			RootBeanDefinition mbd = null;
 
 			// Check with full lock now in order to enforce the same merged instance.
+			// 为空代表的是当前的 BeanDefinition 是顶层的Bean 不存在嵌套Bean
 			if (containingBd == null) {
+				// 获取当前bean
 				mbd = this.mergedBeanDefinitions.get(beanName);
 			}
 
@@ -1276,8 +1290,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 				else {
 					// Child bean definition: needs to be merged with parent.
+					// 获取父bean的名称，并进行转换
 					BeanDefinition pbd;
 					try {
+						// 如果当前beanNam和父beanName不相同，那么递归调用合并方法
 						String parentBeanName = transformedBeanName(bd.getParentName());
 						if (!beanName.equals(parentBeanName)) {
 							pbd = getMergedBeanDefinition(parentBeanName);
