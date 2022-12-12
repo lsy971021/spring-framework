@@ -1237,6 +1237,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return mbd;
 		}
 		// 如果不存在于缓存中，根据beanName和BeanDefinition，获取mergedBeanDefinitions
+		// 在实例化之前要把所有的基础的beanDefinition对象转成RootBeanDefinition，进行缓存，后续在需要马上要实例化的时候，直接获取定义信息，
+		// 而定义信息中如果包含了父类，那么必须要先创建父类才能有子类，
 		return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
 	}
 
@@ -1288,9 +1290,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						mbd = new RootBeanDefinition(bd);
 					}
 				}
+				// 如果父beanDefinition 不为空，也就代表了当前类存在继承，如果不理解这段话，可以看下 <bean parent=""> bean标签中的parent属性
+				// 父子都是bean，父bean的属性可以继承给子bean，子bean可以覆盖父bean的属性， 若父bean是一个抽象的bean，则不会为它生成实例化对象
+				// 父子bean在代码层面可以不是 继承关系
 				else {
 					// Child bean definition: needs to be merged with parent.
 					// 获取父bean的名称，并进行转换
+					// 子bean定义： 需要与父bean合并
 					BeanDefinition pbd;
 					try {
 						// 如果当前beanNam和父beanName不相同，那么递归调用合并方法
@@ -1334,6 +1340,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Cache the merged bean definition for the time being
 				// (it might still get re-merged later on in order to pick up metadata changes)
+				// 将beanName于mbd放到mergedBeanDefinitions缓存，以便之后可以直接使用
 				if (containingBd == null && isCacheBeanMetadata()) {
 					this.mergedBeanDefinitions.put(beanName, mbd);
 				}

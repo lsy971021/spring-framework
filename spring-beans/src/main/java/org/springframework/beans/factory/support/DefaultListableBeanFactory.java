@@ -737,10 +737,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 			// 非抽象、单例、非懒加载进行注册
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+				// BeanFactory  和  FactoryBean 都是对象工厂，用来创建对象的
+				//		如果使用BeanFactory接口，那么必须严格遵守springbean的生命周期接口，从实例化，到初始化，到invokeAwareMethod.invokeInitMethod,before,after,此流程非常复杂且麻烦
+				//		如果需要一种更加简洁简单的方式创建，就需要实现FactoryBean这个接口，不需要遵循此创建顺序
+				//			FactoryBean创建对象时候共创建了两个对象（实现了factoryBean接口的子类对象，getObject方法返回的对象）， 都交给spring管理
+				//				但是存放对象的缓存集合不同，实现了FactoryBean接口的对象在一级缓存（ac.getBean("&xxx")），getObject方法返回的对象在factoryBeanObjectCache中存储(ac.getBean("xxx"))，如果不是单例对象，每次调用时会重新创建，缓存中不会保存当前对象
+				// 判断是否实现了factoryBean接口
 				if (isFactoryBean(beanName)) {
+					// 根据 &+beanName来获取具体的对象
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
+					// 进行类型转换
 					if (bean instanceof FactoryBean) {
 						FactoryBean<?> factory = (FactoryBean<?>) bean;
+						// 判断这个FactoryBean是否希望急切的初始化
 						boolean isEagerInit;
 						if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
 							isEagerInit = AccessController.doPrivileged(
@@ -751,6 +760,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							isEagerInit = (factory instanceof SmartFactoryBean &&
 									((SmartFactoryBean<?>) factory).isEagerInit());
 						}
+						// 如果希望急切的初始化，则通过beanName获取bean实例
 						if (isEagerInit) {
 							getBean(beanName);
 						}
@@ -763,6 +773,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		// Trigger post-initialization callback for all applicable beans...
+		// 遍历beanNames，触发所有SmartInitializingSingleton的后初始化回调
 		for (String beanName : beanNames) {
 			Object singletonInstance = getSingleton(beanName);
 			if (singletonInstance instanceof SmartInitializingSingleton) {
