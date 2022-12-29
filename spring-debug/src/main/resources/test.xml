@@ -42,6 +42,7 @@
     </bean>
 <!--    <bean class="com.mashibing.MyBFPP"></bean>-->
     <bean class="com.lsy.MyBeanFactoryPostProcessor"></bean>
+    <bean class="com.lsy.MyInstantiationAwareBeanPostProcessor"></bean>
 	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
 		<property name="propertyEditorRegistrars">
 			<list>
